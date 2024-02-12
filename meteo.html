@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meteo</title>
+</head>
+<body>
+
+    <div id="weatherDiv">
+
+    </div>
+    <script src="https://gist.github.com/Sarxzer/e3663fff5c3acf75c1c92e334a28f3a6.js"></script>
+    
+
+    <script>
+        const weatherDiv = document.getElementById('weatherDiv');
+
+        async function fetchWeather() {
+            try {
+                const ipInfo = await fetch('https://ipinfo.io/json?b8e8572521f975');
+                dataPosition = await ipInfo.json();
+                                    
+                position = dataPosition.loc.split(',');
+                position += dataPosition.city;
+            } catch {
+                position = [48.8534,2.3488,'Paris']
+            }
+            
+            const dataWeather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${position[0]}&longitude=${position[1]}&current=temperature_2m,is_day,weather_code`);
+            const weather = await dataWeather.json();
+            console.log(weather);
+
+            const weatherCode = await fetch('https://gist.githubusercontent.com/Sarxzer/e3663fff5c3acf75c1c92e334a28f3a6/raw/a95809640d2ec1a4a2cd462bc446263dfdcd7eb8/weather_code_description.json');
+            weatherDesc = await weatherCode.json();
+
+            if (weather.current.is_day == 1) {
+                weatherDesc = weatherDesc[weather.current.weather_code].day
+            } else {
+                weatherDesc = weatherDesc[weather.current.weather_code].night
+            }
+
+            weatherDiv.textContent = `Température à ${position[2]} : ${weather.current.temperature_2m} \n Météo: ${weatherDesc.description}`;
+        }
+
+        fetchWeather()
+    </script>
+</body>
+</html>
